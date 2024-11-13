@@ -22,7 +22,7 @@ app.get("/", function (req, res) {
             numberOfHealthyKidneys++;
     }
     const numberOfUnHealthyKidneys = numberOfKidneys - numberOfHealthyKidneys;
-    res.send(`Here is the data, nmber of Kidneys: ${numberOfKidneys}, number of healty kidneys: ${numberOfHealthyKidneys}
+    res.send(`Here is the data, number of Kidneys: ${numberOfKidneys}, number of healty kidneys: ${numberOfHealthyKidneys}
         , and number of unhealthy Kidneys: ${numberOfUnHealthyKidneys}`);
 })
 
@@ -30,10 +30,48 @@ app.post("/", function (req, res) {
     // console.log(req.body);      // undefined
     const isHealthy = req.body.isHealthy;
     user[0].kidenys.push({
-            healthy: isHealthy
+        healthy: isHealthy
     });
     res.json({
         msg: "Done!"
     })
 })
+
+app.put("/", function (req, res) {
+    for (let i = 0; i < user[0].kidenys.length; i++) {
+        user[0].kidenys[i].healthy = true;
+    }
+    res.json({});
+})
+
+// removing all the unhealthy kidneys
+app.delete("/", function (req, res) {
+    // you should return a 411
+    // only if atlest one unhealty kidney is there do this, else return 411
+    if (isThereAtLeastOneUnhealtyKideney()) {
+        const newKidneys = [];
+        for (let i = 0; i < user[0].kidenys.length; i++) {
+            if (user[0].kidenys[i].healthy) {
+                newKidneys.push({
+                    healthy: true
+                })
+            }
+        }
+        user[0].kidenys = newKidneys;
+        res.json({ msg: "done" })
+    }
+    else {
+        res.status(411).json({
+            msg: "You have no unhealthy kidneys"
+        });
+    }
+    
+})
+function isThereAtLeastOneUnhealtyKideney() {
+    for (let i = 0; i < user[0].kidenys.length; i++) {
+        if (!user[0].kidenys[i])
+            return true;
+    }
+    return false;
+}
 app.listen(3000);
