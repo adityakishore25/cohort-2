@@ -39,11 +39,90 @@
 
   Testing the server - run `npm run test-todoServer` command in terminal
  */
-  const express = require('express');
-  const bodyParser = require('body-parser');
-  
-  const app = express();
-  
-  app.use(bodyParser.json());
-  
-  module.exports = app;
+const express = require('express');
+const bodyParser = require('body-parser');
+const PORT = 3000;
+
+
+const app = express();
+app.use(bodyParser.json());
+
+let todos = [
+  {
+    id: 21,
+    task: "playing",
+    description: "maintain good health",
+    completed: "false"
+
+  },
+  {
+    id: 20,
+    task: "reading",
+    description: "get some good books to read",
+    completed: "false"
+  }
+]
+app.get("/todos", (req, res) => {
+  res.json({ todos });
+});
+
+
+app.get("/todos/:id", (req, res) => {
+  const todo = todos.find(t => t.id === parseInt(req.params.id));
+  if (!todo) {
+    res.status(404).send("Todo not found");
+  }
+  else {
+    res.json({ todo });
+  }
+});
+
+
+app.post("/todos", (req, res) => {
+  const newTodo = {
+    id: Math.floor(Math.random() * 100),
+    task: req.body.task,
+    description: req.body.description,
+    completed: req.body.completed
+  };
+  todos.push(newTodo);
+  res.status(201).send(newTodo);
+});
+
+
+app.put("/todos/:id", (req, res) => {
+  const todoIndex = todos.findIndex(t => t.id === parseInt(req.params.id));
+  if (todoIndex == -1) {
+    res.status(404).send("Todos not found!!");
+  }
+  else {
+    todos[todoIndex].task = req.body.task;
+    todos[todoIndex].description = req.body.description;
+    todos[todoIndex].completed = req.body.completed;
+    res.json(todos[todoIndex]);
+  }
+});
+
+
+
+app.delete("/todos/:id", (req, res) => {
+  const idToDelete = parseInt(req.params.id);
+  const todoExists = todos.some(t => t.id === idToDelete);
+
+  if (!todoExists) {
+    res.status(404).send("Todo not found!!");
+  } else {
+    todos = todos.filter(t => t.id !== idToDelete);
+    res.status(200).json({ message: "Todo deleted successfully!" });
+  }
+});
+
+
+
+
+app.use(bodyParser.json());
+
+module.exports = app;
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
